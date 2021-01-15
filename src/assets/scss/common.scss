@@ -1,0 +1,74 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+.cursor-p {
+  cursor: pointer;
+}
+// var
+$length: 100;
+//margin 例：.mr14
+@for $i from 1 through $length {
+  .mr#{$i} {
+    margin-right: 1px * $i;
+  }
+  .ml#{$i} {
+    margin-left: 1px * $i;
+  }
+  .mb#{$i} {
+    margin-bottom: 1px * $i;
+  }
+  .mt#{$i} {
+    margin-top: 1px * $i;
+  }
+  .mx#{$i} {
+    margin: 0 1px * $i;
+  }
+  .my#{$i} {
+    margin: 1px * $i 0;
+  }
+  .m#{$i} {
+    margin: 1px * $i;
+  }
+
+  .pr#{$i} {
+    padding-right: 1px * $i;
+  }
+  .pl#{$i} {
+    padding-left: 1px * $i;
+  }
+  .pb#{$i} {
+    padding-bottom: 1px * $i;
+  }
+  .pt#{$i} {
+    padding-top: 1px * $i;
+  }
+  .px#{$i} {
+    padding: 0 1px * $i;
+  }
+  .py#{$i} {
+    padding: 1px * $i 0;
+  }
+  .p#{$i} {
+    padding: 1px * $i;
+  }
+
+  .fs#{$i} {
+    font-size: 1px * $i;
+  }
+}
+
+.text-center {
+  text-align: center;
+}
+.text-left {
+  text-align: left;
+}
+.text-right {
+  text-align: right;
+}
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
