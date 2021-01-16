@@ -11,10 +11,21 @@ export const readAll = gql`
       endTime
       createBy
       status
-      voteRoleType {
-        id
-        name
+      voteConfig {
+        voteLevel
+        voteQqVip
+        file {
+          fileFullPath
+        }
       }
+    }
+  }
+`
+
+export const readCount = gql`
+  query readCount($filter: VoteFilter) {
+    page: voteCount(filter: $filter) {
+      total
     }
   }
 `

@@ -1,15 +1,16 @@
 import axios from 'axios'
 import { Toast } from 'vant'
 import router from '../router'
+import store from '../store/index'
 
 const request = axios.create({
-  baseURL: 'http://localhost:70001/api',
+  baseURL: 'http://localhost:7001/api',
   timeout: 10000,
 })
 
 request.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token')
+    const token = (store as any).state.common.token || localStorage.getItem('token')
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`
     }

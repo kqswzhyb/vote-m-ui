@@ -18,3 +18,6 @@ export const tabbarList = [
     content: '我的',
   },
 ]
+
+export const imgBaseUrl =
+  'https://kurumi-1258026269.cos.ap-shanghai.myqcloud.com/'
