@@ -4,14 +4,21 @@ import store from '../store/index'
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
+    redirect:'/vote',
     name: 'Layout',
     component: () => import(/* webpackChunkName: "layout" */"@/views/Layout.vue"),
     children: [
       {
-        path: "/",
+        path: "/vote",
         name: "Vote",
         component: () =>
           import(/* webpackChunkName: "vote" */ "@/views/Vote.vue")
+      },
+      {
+        path: "/vote/:id",
+        name: "VoteDetail",
+        component: () =>
+          import(/* webpackChunkName: "voteDetail" */ "@/views/VoteDetail.vue")
       },
       {
         path: "/moe",

@@ -4,7 +4,6 @@
       <van-tab title="进行中" name="5"></van-tab>
       <van-tab title="待开始" name="4"></van-tab>
       <van-tab title="已结束" name="6"></van-tab>
-      <van-tab title="关停" name="2"></van-tab>
     </van-tabs>
   </van-sticky>
   <van-list
@@ -60,7 +59,7 @@ const {
 
 ref: loading = false
 ref: finished = false
-ref: activeTab = '4'
+ref: activeTab = '5'
 ref: listData = []
 ref: current = 1
 ref: limit = 3

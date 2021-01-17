@@ -46,11 +46,6 @@ const goLogin = () => {
 </script>
 
 <style lang="scss" scoped>
-.bg {
-  background-color: #f7f7f7;
-  height: 100vh;
-}
-
 .user-info {
   width: 100vw;
   padding: 15px;

@@ -45,7 +45,7 @@ const onSubmit = (values) => {
       localStorage.setItem('token', res.data.data)
       store.commit('common/setToken', res.data.data)
       Toast.success('登录成功')
-      router.push('/')
+      router.push('/vote')
     } else {
       Toast.fail(res.data.message)
     }
@@ -53,9 +53,4 @@ const onSubmit = (values) => {
 }
 </script>
 
-<style lang="scss">
-.bg {
-  background-color: #f7f7f7;
-  height: 100vh;
-}
-</style>
+<style lang="scss"></style>

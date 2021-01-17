@@ -4,7 +4,6 @@
       <van-tab title="进行中" name="5"></van-tab>
       <van-tab title="待开始" name="4"></van-tab>
       <van-tab title="已结束" name="6"></van-tab>
-      <van-tab title="关停" name="2"></van-tab>
     </van-tabs>
   </van-sticky>
   <van-list
@@ -16,7 +15,12 @@
     v-if="listData.length"
     class="list-view"
   >
-    <div v-for="item in listData" class="list-cell" :key="item.id">
+    <div
+      v-for="item in listData"
+      class="list-cell"
+      :key="item.id"
+      @click="goDetail(item.id)"
+    >
       <img
         v-lazy="
           item.voteConfig.file
@@ -47,8 +51,9 @@
 </template>
 
 <script lang="ts" setup>
-import { getCurrentInstance, ref, onBeforeMount, computed } from 'vue'
+import { getCurrentInstance, ref, onBeforeMount } from 'vue'
 import { readAll, readCount } from '@/graphql/vote/vote'
+import router from '@/router'
 
 const {
   appContext: {
@@ -60,7 +65,7 @@ const {
 
 ref: loading = false
 ref: finished = false
-ref: activeTab = '4'
+ref: activeTab = '5'
 ref: listData = []
 ref: current = 1
 ref: limit = 3
@@ -114,6 +119,10 @@ const onLoad = () => {
     current++
     getList()
   }
+}
+
+const goDetail = (id) => {
+  router.push(`/vote/${id}`)
 }
 
 onBeforeMount(() => {

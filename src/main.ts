@@ -4,7 +4,7 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import { imgBaseUrl } from './setting'
-import { Button, Toast, Tabbar, TabbarItem, Tab, Tabs, Sticky, Empty, Lazyload, List, Form, Field, Grid, GridItem } from 'vant'
+import { Button, Toast, Tabbar, TabbarItem, Tab, Tabs, Sticky, Empty, Lazyload, List, Form, Field, Grid, GridItem, NavBar, Dialog } from 'vant'
 
 const app = createApp(App)
 app.config.warnHandler = () => { }
@@ -31,4 +31,6 @@ app.use(Form)
 app.use(Field)
 app.use(Grid);
 app.use(GridItem);
+app.use(NavBar);
+app.use(Dialog);
 app.mount('#app')

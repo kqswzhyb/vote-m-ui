@@ -22,6 +22,64 @@ export const readAll = gql`
   }
 `
 
+export const readOne = gql`
+  query readOne($id: ID!) {
+    data: vote(id: $id) {
+      id
+      voteName
+      voteType
+      specialType
+      hasReward
+      rewardContent
+      ruleContent
+      startTime
+      endTime
+      createBy
+      status
+      roundStage {
+        name
+        totalCount
+        promotionCount
+        startTime
+        endTime
+        round {
+          roundName
+          groupName
+          startTime
+          endTime
+          roundRole {
+            id
+            isPromotion
+            normalCount
+            specialCount
+            totalCount
+            voteRole {
+              roleName
+              alias
+              description
+              file {
+                fileFullPath
+              }
+            }
+          }
+        }
+      }
+      voteConfig {
+        voteLevel
+        voteQqVip
+        showMap
+        showChart
+        voteShowType
+        voteUpdateType
+        diyBg
+        file {
+          fileFullPath
+        }
+      }
+    }
+  }
+`
+
 export const readCount = gql`
   query readCount($filter: VoteFilter) {
     page: voteCount(filter: $filter) {
