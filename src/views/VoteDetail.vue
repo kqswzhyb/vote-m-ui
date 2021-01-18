@@ -88,7 +88,7 @@
               type="primary"
               plain
               size="mini"
-              @click="toVote(item.id)"
+              @click="toVote(item)"
               >投票</van-button
             >
           </p>
@@ -104,6 +104,7 @@ import { ref, watch, getCurrentInstance, computed } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute, useRouter } from 'vue-router'
 import { readOne } from '@/graphql/vote/vote'
+import { readAll, batchCreateVoteRecord } from '@/graphql/vote/voteRecord'
 import { optionalChaining, shuffle } from '@/utils/utils'
 import { Dialog, Toast } from 'vant'
 
@@ -113,28 +114,49 @@ const store = useStore()
 const {
   appContext: {
     config: {
-      globalProperties: { $query, $imgBaseUrl },
+      globalProperties: { $query, $imgBaseUrl, $mutate },
     },
   },
 } = getCurrentInstance()
 const token = computed(() => store.getters['common/token'])
+const user = computed(() => store.getters['user/info'])
 
 ref: voteInfo = {}
 ref: rankList = []
 ref: showCount = true
+ref: voteRecord = []
 
 const getVote = (id) => {
-  $query(readOne, { id }).then((res) => {
+  $query(readOne, { id }).then(async (res) => {
     if (!res.errors) {
       voteInfo = res.data.data
+      if (token.value) {
+        const result = await $query(readAll, {
+          filter: {
+            userId: JSON.stringify({
+              cond: 'eq',
+              value: user.value.id,
+            }),
+            roundId: JSON.stringify({
+              cond: 'eq',
+              value: voteInfo.roundStage[0].round[0].id,
+            }),
+          },
+          page: { limit: 10, offset: 0 },
+        })
+        if (!result.errors) {
+          voteRecord = result.data.data
+        }
+      }
       if (
         voteInfo.status !== '5' ||
         voteInfo.voteConfig.voteShowType === '1' ||
         new Date().getTime() >=
-          new Date(voteInfo.roundStage[0].round[0].endTime).getTime()
+          new Date(voteInfo.roundStage[0].round[0].endTime).getTime() ||
+        !!voteRecord.length
       ) {
         rankList = voteInfo.roundStage[0].round[0].roundRole.sort(
-          (a, b) => a.totalCount - b.totalCount
+          (a, b) => b.totalCount - a.totalCount
         )
         showCount = true
       } else {
@@ -167,20 +189,50 @@ const showDialog = (mode) => {
   })
 }
 
-const toVote = (id) => {
+const toVote = (row) => {
   if (!token.value) {
     Toast.fail('请先登录')
     return
   }
+  Dialog.confirm({
+    title: '提示',
+    allowHtml: true,
+    message: `确认为 <b>${row.voteRole.roleName}</b> 投票吗，投票后将不能投票其他角色，是否继续？`,
+  }).then(() => {
+    $mutate(batchCreateVoteRecord, {
+      input: [
+        {
+          userId: user.value.id,
+          roundId: voteInfo.roundStage[0].round[0].id,
+          voteType: '0',
+          isExtra: '0',
+          roundRoleId: row.id,
+        },
+      ],
+    }).then((res) => {
+      if(!res.errors){
+        rankList = voteInfo.roundStage[0].round[0].roundRole.sort(
+          (a, b) => b.totalCount - a.totalCount
+        )
+        showCount = true
+        Toast.success("投票成功！")
+      }else {
+        Toast.fail("投票失败，请重试！")
+      }
+    })
+  })
 }
 
 watch(
   () => route.params,
   (val) => {
     if (val.id) {
+      voteInfo = {}
+      rankList = []
+      showCount = true
+      voteRecord = []
       getVote(val.id)
     }
-    console.log(val)
   },
   {
     immediate: true,

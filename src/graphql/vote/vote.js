@@ -43,12 +43,14 @@ export const readOne = gql`
         startTime
         endTime
         round {
+          id
           roundName
           groupName
           startTime
           endTime
           roundRole {
             id
+            roleId
             isPromotion
             normalCount
             specialCount
