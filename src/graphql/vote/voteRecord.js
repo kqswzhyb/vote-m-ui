@@ -5,6 +5,11 @@ export const readAll = gql`
     data: voteRecordList(page: $page, filter: $filter) {
       id
       roundRoleId
+      roundRole {
+          voteRole {
+              roleName
+          }
+      }
       voteType
       isExtra
     }
@@ -13,7 +18,7 @@ export const readAll = gql`
 
 export const batchCreateVoteRecord = gql`
   mutation batchCreateVoteRecord($input: [CreateVoteRecordInput]!) {
-    batchCreateVoteRecord(input: $input) {
+    data:batchCreateVoteRecord(input: $input) {
       code
       message
     }

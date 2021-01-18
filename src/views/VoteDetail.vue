@@ -38,13 +38,6 @@
           }}
         </p>
         <p class="fs12 grey1">
-          {{
-            optionalChaining(voteInfo, 'voteConfig', 'voteQqVip') === '0'
-              ? '需要QQ会员'
-              : '无会员限制'
-          }}
-        </p>
-        <p class="fs12 grey1">
           {{ voteInfo.hasReward === '0' ? '无奖励' : '有奖励' }}
         </p>
         <div>
@@ -64,6 +57,13 @@
           >
         </div>
       </div>
+    </div>
+    <div class="ml10" v-if="voteRecord.length">
+      <p>
+        您的选择：<span v-for="item in voteRecord" :key="item.id">{{
+          item.roundRole.voteRole.roleName
+        }}</span>
+      </p>
     </div>
     <div class="vote-cond">
       <div class="vote-table-header">
@@ -202,6 +202,7 @@ const toVote = (row) => {
     $mutate(batchCreateVoteRecord, {
       input: [
         {
+          voteId: route.params.id,
           userId: user.value.id,
           roundId: voteInfo.roundStage[0].round[0].id,
           voteType: '0',
@@ -210,14 +211,18 @@ const toVote = (row) => {
         },
       ],
     }).then((res) => {
-      if(!res.errors){
-        rankList = voteInfo.roundStage[0].round[0].roundRole.sort(
-          (a, b) => b.totalCount - a.totalCount
-        )
-        showCount = true
-        Toast.success("投票成功！")
-      }else {
-        Toast.fail("投票失败，请重试！")
+      if (!res.errors) {
+        if (res.data.data.code === '0') {
+          rankList = voteInfo.roundStage[0].round[0].roundRole.sort(
+            (a, b) => b.totalCount - a.totalCount
+          )
+          showCount = true
+          Toast.success('投票成功！')
+        } else {
+          Toast.fail(res.data.data.message)
+        }
+      } else {
+        Toast.fail('投票失败，请重试！')
       }
     })
   })
