@@ -1,5 +1,6 @@
 //字符串首字母大写
-export const firstStringUp = (word) => word.substring(0, 1).toUpperCase() + word.substring(1)
+export const firstStringUp = (word) =>
+  word.substring(0, 1).toUpperCase() + word.substring(1)
 //vuex getters生成
 export const generateGetters = (stateObj = {}) => {
   const keys = Object.keys(stateObj)
@@ -24,12 +25,19 @@ export const generateMutations = (stateObj = {}) => {
 }
 //可选链
 export const optionalChaining = (obj, ...rest) => {
-  let tmp = obj;
+  let tmp = obj
   for (let key in rest) {
-    let name = rest[key];
-    tmp = tmp?.[name];
+    let name = rest[key]
+    tmp = tmp?.[name]
   }
-  return tmp || "";
-};
+  return tmp || ''
+}
 // 数组洗牌
-export const shuffle = (arr) => arr.sort(() => Math.random() - 0.5);
+export const shuffle = (arr) => arr.sort(() => Math.random() - 0.5)
+// 字典转换
+export const transferDic = (list, value = '') => {
+  if (!list) {
+    list = []
+  }
+  return list.find((v) => v.value === value)?.name
+}

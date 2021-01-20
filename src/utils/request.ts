@@ -36,6 +36,7 @@ request.interceptors.response.use(
     //Do something with response error
     if (err?.response?.status === 401) {
       localStorage.removeItem('token')
+      store.commit('common/setToken','')
       Toast.fail('登录状态已过期失效')
       router.push('/login')
     }

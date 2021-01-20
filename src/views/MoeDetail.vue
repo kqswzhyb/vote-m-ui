@@ -1,11 +1,13 @@
 <template>
   <div class="bg">
-    <van-nav-bar
-      :title="voteInfo.voteName"
-      left-text="返回"
-      left-arrow
-      @click-left="onClickLeft"
-    />
+    <van-sticky :offset-top="0">
+      <van-nav-bar
+        :title="voteInfo.voteName"
+        left-text="返回"
+        left-arrow
+        @click-left="onClickLeft"
+      />
+    </van-sticky>
     <div class="vote-info">
       <img
         v-lazy="
@@ -58,50 +60,78 @@
         </div>
       </div>
     </div>
-    <div class="ml10" v-if="voteRecord.length">
-      <p>
-        您的选择：<span v-for="item in voteRecord" :key="item.id">{{
-          item.roundRole.voteRole.roleName
-        }}</span>
-      </p>
-    </div>
-    <p class="fs12 ml10" v-if="voteInfo.roundStage">
+    <van-sticky :offset-top="46">
+      <van-tabs
+        class="no-margin"
+        v-model:active="activeTab"
+        @change="changeTab"
+        v-if="voteInfo.roundStage"
+        type="card"
+      >
+        <van-tab
+          v-for="item in voteInfo.roundStage"
+          :key="item.id"
+          :name="item.id"
+          :title="item.name"
+        >
+        </van-tab>
+      </van-tabs>
+    </van-sticky>
+    <van-sticky
+      :offset-top="74"
+      v-if="voteInfo.voteRoleType && voteInfo.voteRoleType.length > 1"
+    >
+      <van-tabs v-model:active="activeRole" sticky>
+        <van-tab
+          v-for="item in voteInfo.voteRoleType"
+          :key="item.id"
+          :name="item.id"
+          :title="item.name"
+        >
+        </van-tab>
+      </van-tabs>
+    </van-sticky>
+    <p class="fs12 ml10" v-if="voteInfo.roundStage && rankList.length">
       每{{
         transferDic(
           dicList['vote_update_type'],
-          voteInfo.voteConfig.voteUpdateType
+          optionalChaining(voteInfo, 'voteConfig', 'voteUpdateType')
         )
       }}更新一次，上次更新于{{
-        voteInfo.roundStage[0].round[0].roundRole[0].updatedAt
+        rankList[0].roundRole[0] && rankList[0].roundRole[0].updatedAt
       }}
     </p>
+    <p class="fs12 ml10" v-if="rankList.length">
+      投票时间：<span
+        >{{ roundStage.startTime }} ~ {{ roundStage.endTime }}</span
+      >
+    </p>
     <div class="vote-cond">
-      <div class="vote-table-header">
-        <p class="text-center" style="width: 20vw">名次</p>
-        <p style="width: 60vw">角色</p>
-        <p style="width: 20vw">票数</p>
-      </div>
-      <template v-if="voteInfo.roundStage">
-        <div
-          v-for="(item, index) in rankList"
-          :key="item.id"
-          class="vote-table-body"
-        >
-          <p class="text-center" style="width: 20vw">
-            {{ showCount ? index + 1 : '???' }}
-          </p>
-          <p style="width: 60vw">{{ item.voteRole.roleName }}</p>
-          <p style="width: 20vw">
-            <span v-if="showCount">{{ item.totalCount }}</span>
-            <van-button
-              v-else
-              type="primary"
-              plain
-              size="mini"
-              @click="toVote(item)"
-              >投票</van-button
-            >
-          </p>
+      <template v-if="rankList.length && rankList[0].roundRole.length">
+        <div v-for="item in rankList" :key="item.id" class="mt10">
+          <h3 class="text-center">{{ item.groupName }}</h3>
+          <div class="role-view">
+            <div v-for="sin in item.roundRole" :key="sin.id">
+              <img
+                v-lazy="
+                  $imgBaseUrl +
+                    optionalChaining(sin.voteRole, 'file', 'fileFullPath') ||
+                  '@/assets/images/none.png'
+                "
+                style="width: calc(40vw - 10px); height: calc(40vw - 10px)"
+                alt=""
+              />
+              <p class="role-name">
+                {{ optionalChaining(sin.voteRole, 'roleName') }}
+              </p>
+              <p class="role-vote">
+                <van-icon name="fire" color="#fa3b19" class="mr5" /><span
+                  class="fs15"
+                  >{{ sin.totalCount }}</span
+                >
+              </p>
+            </div>
+          </div>
         </div>
       </template>
       <van-empty v-else image="search" description="暂无投票信息" />
@@ -113,7 +143,8 @@
 import { ref, watch, getCurrentInstance, computed } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute, useRouter } from 'vue-router'
-import { readOne } from '@/graphql/vote/vote'
+import { readOnePart } from '@/graphql/vote/vote'
+import { readOne } from '@/graphql/vote/round'
 import { readAll, batchCreateVoteRecord } from '@/graphql/vote/voteRecord'
 import { optionalChaining, shuffle, transferDic } from '@/utils/utils'
 import { Dialog, Toast } from 'vant'
@@ -134,8 +165,11 @@ const dicList = computed(() => store.getters['common/dicList'])
 
 ref: voteInfo = {}
 ref: rankList = []
+ref: roundStage = {}
 ref: showCount = true
 ref: voteRecord = []
+ref: activeTab = ''
+ref: activeRole = ''
 
 const getRecord = async () => {
   const result = await $query(readAll, {
@@ -144,9 +178,9 @@ const getRecord = async () => {
         cond: 'eq',
         value: user.value.id,
       }),
-      roundId: JSON.stringify({
+      roundStageId: JSON.stringify({
         cond: 'eq',
-        value: voteInfo.roundStage[0].round[0].id,
+        value: activeTab,
       }),
     },
     page: { limit: 10, offset: 0 },
@@ -155,29 +189,46 @@ const getRecord = async () => {
     voteRecord = result.data.data
   }
 }
+const changeTab = () => {
+    // router.go(`#${activeTab}`)
+  $query(readOne, {
+    id: activeTab,
+  }).then(async (res) => {
+    roundStage = res.data.data
+    if (token.value) {
+      await getRecord()
+    }
+    if (
+      voteInfo.status !== '5' ||
+      voteInfo.voteConfig.voteShowType === '1' ||
+      new Date().getTime() >= new Date(roundStage.endTime).getTime() ||
+      !!voteRecord.length
+    ) {
+      roundStage.round.forEach((v) => {
+        v = v.roundRole.sort((a, b) => b.totalCount - a.totalCount)
+      })
+      rankList = roundStage.round
+      showCount = true
+    } else {
+      roundStage.round.forEach((v) => {
+        v = shuffle(v.roundRole)
+      })
+      rankList = roundStage.round
+      showCount = false
+    }
+  })
+}
 
 const getVote = (id) => {
-  $query(readOne, { id }).then(async (res) => {
+  $query(readOnePart, { id }).then(async (res) => {
     if (!res.errors) {
       voteInfo = res.data.data
-      if (token.value) {
-        await getRecord()
-      }
-      if (
-        voteInfo.status !== '5' ||
-        voteInfo.voteConfig.voteShowType === '1' ||
-        new Date().getTime() >=
-          new Date(voteInfo.roundStage[0].round[0].endTime).getTime() ||
-        !!voteRecord.length
-      ) {
-        rankList = voteInfo.roundStage[0].round[0].roundRole.sort(
-          (a, b) => b.totalCount - a.totalCount
-        )
-        showCount = true
-      } else {
-        rankList = shuffle(voteInfo.roundStage[0].round[0].roundRole)
-        showCount = false
-      }
+      activeRole = voteInfo.voteRoleType[0].id
+      activeTab = voteInfo.roundStage[0].id
+      changeTab()
+      voteInfo.roundStage.filter(
+        (v) => v.roleTypeId === voteInfo.voteRoleType[0].id
+      )
     }
   })
 }
@@ -246,14 +297,18 @@ const toVote = (row) => {
 }
 
 watch(
-  () => route.params,
-  (val) => {
-    if (val.id) {
+  [() => route.params.id, () => route.hash],
+  ([id, hash]) => {
+    if (id) {
       voteInfo = {}
+      roundStage = {}
       rankList = []
       showCount = true
       voteRecord = []
-      getVote(val.id)
+      getVote(id)
+    }
+    if (hash) {
+    //   activeTab = hash
     }
   },
   {
@@ -279,14 +334,35 @@ watch(
   }
   .vote-cond {
     margin-top: 20px;
+    padding-bottom: 50px;
     width: 100%;
     background-color: #fff;
-    .vote-table-header {
+    .role-view {
       display: flex;
+      justify-content: space-around;
+      .role-name {
+        text-align: center;
+        margin: 5px 0;
+        color: #333;
+      }
+      .role-vote {
+        padding-left: 15px;
+        display: flex;
+        align-items: center;
+        text-align: left;
+        margin: 5px 0;
+        color: rgb(218, 109, 76);
+      }
     }
-    .vote-table-body {
-      display: flex;
-    }
+  }
+}
+.no-margin::v-deep {
+  .van-tabs__nav--card {
+    margin: 0 !important;
+  }
+  .van-tabs__nav--complete {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
   }
 }
 </style>

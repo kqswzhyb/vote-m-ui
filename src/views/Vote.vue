@@ -53,7 +53,7 @@
 <script lang="ts" setup>
 import { getCurrentInstance, ref, onBeforeMount } from 'vue'
 import { readAll, readCount } from '@/graphql/vote/vote'
-import router from '@/router'
+import { useRouter } from 'vue-router'
 
 const {
   appContext: {
@@ -62,6 +62,7 @@ const {
     },
   },
 } = getCurrentInstance()
+const router = useRouter()
 
 ref: loading = false
 ref: finished = false

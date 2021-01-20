@@ -15,7 +15,7 @@
     v-if="listData.length"
     class="list-view"
   >
-    <div v-for="item in listData" class="list-cell" :key="item.id">
+    <div v-for="item in listData" class="list-cell" :key="item.id" @click="goDetail(item.id)">
       <img
         v-lazy="
           item.voteConfig.file
@@ -48,6 +48,7 @@
 <script lang="ts" setup>
 import { getCurrentInstance, ref, onBeforeMount, computed } from 'vue'
 import { readAll, readCount } from '@/graphql/vote/vote'
+import { useRouter } from 'vue-router'
 
 const {
   appContext: {
@@ -56,6 +57,7 @@ const {
     },
   },
 } = getCurrentInstance()
+const router = useRouter()
 
 ref: loading = false
 ref: finished = false
@@ -113,6 +115,10 @@ const onLoad = () => {
     current++
     getList()
   }
+}
+
+const goDetail = (id) => {
+  router.push(`/moe/${id}`)
 }
 
 onBeforeMount(() => {

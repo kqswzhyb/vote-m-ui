@@ -37,7 +37,9 @@ export const readOne = gql`
       createBy
       status
       roundStage {
+        id
         name
+        roleTypeId
         totalCount
         promotionCount
         startTime
@@ -55,6 +57,7 @@ export const readOne = gql`
             normalCount
             specialCount
             totalCount
+            updatedAt
             voteRole {
               roleName
               alias
@@ -65,6 +68,46 @@ export const readOne = gql`
             }
           }
         }
+      }
+      voteConfig {
+        voteLevel
+        voteQqVip
+        showMap
+        showChart
+        voteShowType
+        voteUpdateType
+        diyBg
+        file {
+          fileFullPath
+        }
+      }
+    }
+  }
+`
+
+export const readOnePart = gql`
+  query readOnePart($id: ID!) {
+    data: vote(id: $id) {
+      id
+      voteName
+      voteType
+      specialType
+      hasReward
+      rewardContent
+      ruleContent
+      startTime
+      endTime
+      createBy
+      status
+      voteRoleType{
+        id
+        name
+      }
+      roundStage {
+        id
+        name
+        startTime
+        endTime
       }
       voteConfig {
         voteLevel

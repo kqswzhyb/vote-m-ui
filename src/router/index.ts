@@ -27,6 +27,12 @@ const routes: Array<RouteRecordRaw> = [
           import(/* webpackChunkName: "moe" */ "@/views/Moe.vue")
       },
       {
+        path: "/moe/:id",
+        name: "MoeDetail",
+        component: () =>
+          import(/* webpackChunkName: "moeDetail" */ "@/views/MoeDetail.vue")
+      },
+      {
         path: "/mine",
         name: "Mine",
         component: () =>
@@ -44,7 +50,7 @@ const routes: Array<RouteRecordRaw> = [
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
-  routes
+  routes,
 });
 
 router.beforeEach(async (to, form) => {
