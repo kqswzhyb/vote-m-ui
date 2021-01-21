@@ -1,4 +1,4 @@
-import { getUserInfo } from '../../graphql/api';
+import { getUserInfo } from '../../graphql/api'
 import { generateGetters, generateMutations } from '../../utils/utils'
 import { Toast } from 'vant'
 
@@ -6,15 +6,15 @@ const state = {
   info: {
     nickName: '',
   },
-};
+}
 
 const getters = {
-  ...generateGetters(state)
+  ...generateGetters(state),
 }
 
 const mutations = {
   ...generateMutations(state),
-};
+}
 
 const actions = {
   getUserInfo({ commit, state }, axios) {
@@ -29,12 +29,12 @@ const actions = {
       })
     })
   },
-};
+}
 
 export default {
   namespaced: true,
   state,
   mutations,
   actions,
-  getters
-};
+  getters,
+}

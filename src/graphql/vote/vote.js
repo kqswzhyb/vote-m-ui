@@ -99,7 +99,7 @@ export const readOnePart = gql`
       endTime
       createBy
       status
-      voteRoleType{
+      voteRoleType {
         id
         name
       }

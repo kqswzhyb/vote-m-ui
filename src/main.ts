@@ -4,10 +4,28 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import { imgBaseUrl } from './setting'
-import { Button, Toast, Tabbar, TabbarItem, Tab, Tabs, Sticky, Empty, Lazyload, List, Form, Field, Grid, GridItem, NavBar, Dialog,Icon } from 'vant'
+import {
+  Button,
+  Toast,
+  Tabbar,
+  TabbarItem,
+  Tab,
+  Tabs,
+  Sticky,
+  Empty,
+  Lazyload,
+  List,
+  Form,
+  Field,
+  Grid,
+  GridItem,
+  NavBar,
+  Dialog,
+  Icon,
+} from 'vant'
 
 const app = createApp(App)
-app.config.warnHandler = () => { }
+app.config.warnHandler = () => {}
 app.use(apolloProvider)
 app.config.globalProperties.$query = query
 app.config.globalProperties.$mutate = mutate
@@ -23,15 +41,15 @@ app.use(Sticky)
 app.use(Empty)
 app.use(Lazyload, {
   loading: '@/assets/images/loading.gif',
-  error: '@/assets/images/none.png'
+  error: '@/assets/images/none.png',
 })
 app.use(Toast)
 app.use(List)
 app.use(Form)
 app.use(Field)
-app.use(Grid);
-app.use(GridItem);
-app.use(NavBar);
-app.use(Dialog);
-app.use(Icon);
+app.use(Grid)
+app.use(GridItem)
+app.use(NavBar)
+app.use(Dialog)
+app.use(Icon)
 app.mount('#app')

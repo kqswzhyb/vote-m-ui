@@ -1,11 +1,11 @@
-const path = require('path');
-const fs = require('fs');
+const path = require('path')
+const fs = require('fs')
 // const CompressionPlugin = require("compression-webpack-plugin");
 // const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
 //   .BundleAnalyzerPlugin;
 
 function resolve(dir) {
-  return path.join(__dirname, dir);
+  return path.join(__dirname, dir)
 }
 
 const chunks = {
@@ -15,10 +15,10 @@ const chunks = {
     priority: 10,
     chunks: 'initial', // only package third parties that are initially dependent
   },
-};
+}
 
-fs.readdirSync(resolve('src/views')).forEach(item => {
-  const stat = fs.statSync(resolve('src/views/') + item);
+fs.readdirSync(resolve('src/views')).forEach((item) => {
+  const stat = fs.statSync(resolve('src/views/') + item)
   if (stat.isDirectory() === true) {
     chunks[item] = {
       name: `chunk-${item}`,
@@ -26,9 +26,9 @@ fs.readdirSync(resolve('src/views')).forEach(item => {
       minChunks: 2, //  minimum common number
       priority: 6,
       reuseExistingChunk: true,
-    };
+    }
   }
-});
+})
 
 module.exports = {
   /** 区分打包环境与开发环境
@@ -69,18 +69,18 @@ module.exports = {
       // })
     ],
   },
-  chainWebpack: config => {
-    config.plugins.delete('preload'); // TODO: need test
-    config.plugins.delete('prefetch'); // TODO: need test
+  chainWebpack: (config) => {
+    config.plugins.delete('preload') // TODO: need test
+    config.plugins.delete('prefetch') // TODO: need test
   },
   css: {
     loaderOptions: {
-     sass: {
-      // 根据自己样式文件的位置调整
-      additionalData: `@import "~@/assets/scss/main.scss";`
-     }
-    }
-   },
+      sass: {
+        // 根据自己样式文件的位置调整
+        additionalData: `@import "~@/assets/scss/main.scss";`,
+      },
+    },
+  },
 
   parallel: require('os').cpus().length > 1, // PWA 插件相关配置 // see https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-pwa
 
@@ -97,4 +97,4 @@ module.exports = {
   pluginOptions: {
     // ...
   },
-};
+}

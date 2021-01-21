@@ -1,4 +1,4 @@
-import request from '../utils/request';
+import request from '../utils/request'
 
 //登录
 export function login(data) {
@@ -6,12 +6,12 @@ export function login(data) {
     url: '/auth/login',
     method: 'post',
     data,
-  });
+  })
 }
 //用户信息
 export function getUserInfo() {
   return request({
     url: '/user/info',
     method: 'get',
-  });
+  })
 }

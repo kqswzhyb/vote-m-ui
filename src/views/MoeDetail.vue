@@ -98,7 +98,7 @@
           optionalChaining(voteInfo, 'voteConfig', 'voteUpdateType')
         )
       }}更新一次，上次更新于{{
-        rankList[0].roundRole[0] && rankList[0].roundRole[0].updatedAt
+        optionalChaining(rankList, 0, 'roundRole', 0, 'updatedAt')
       }}
     </p>
     <p class="fs12 ml10" v-if="rankList.length">
@@ -106,12 +106,45 @@
         >{{ roundStage.startTime }} ~ {{ roundStage.endTime }}</span
       >
     </p>
+    <p
+      class="fs12 ml10"
+      v-if="
+        token &&
+        voteRecord.length &&
+        new Date().getTime() >= new Date(roundStage.startTime).getTime()
+      "
+    >
+      您的选择：<span v-for="(item, index) in voteRecord" :key="item.id"
+        >{{ item.roundRole.voteRole.roleName
+        }}{{ index === voteRecord.length - 1 ? '' : '，' }}</span
+      >
+    </p>
+    <p
+      class="fs12 ml10"
+      v-if="
+        token &&
+        !voteRecord.length &&
+        new Date().getTime() >= new Date(roundStage.startTime).getTime() &&
+        new Date().getTime() <= new Date(roundStage.endTime).getTime()
+      "
+    >
+      <van-button
+        color="linear-gradient(to right, #ff6034, #ee0a24)"
+        size="mini"
+        @click="showSelectVote"
+        >投票</van-button
+      >
+    </p>
     <div class="vote-cond">
       <template v-if="rankList.length && rankList[0].roundRole.length">
         <div v-for="item in rankList" :key="item.id" class="mt10">
           <h3 class="text-center">{{ item.groupName }}</h3>
           <div class="role-view">
-            <div v-for="sin in item.roundRole" :key="sin.id">
+            <div
+              v-for="sin in item.roundRole"
+              :key="sin.id"
+              @click="selectRoundRole(item.id, sin.id)"
+            >
               <img
                 v-lazy="
                   $imgBaseUrl +
@@ -135,6 +168,41 @@
         </div>
       </template>
       <van-empty v-else image="search" description="暂无投票信息" />
+    </div>
+    <div class="select-view" v-if="selectRole">
+      <span class="text-center">已选</span>
+      <div class="role-view">
+        <div
+          v-for="(item, index) in rankList"
+          class="empty-role"
+          :key="item.id"
+        >
+          <img
+            v-if="selectList[index]"
+            v-lazy="
+              $imgBaseUrl +
+                optionalChaining(
+                  rankList
+                    .find((v) => v.id === selectList[index].roundId)
+                    .roundRole.find(
+                      (v) => v.id === selectList[index].roundRoleId
+                    ).voteRole,
+                  'file',
+                  'fileFullPath'
+                ) || '@/assets/images/none.png'
+            "
+            width="40"
+            height="40"
+            alt=""
+          />
+        </div>
+        <div class="empty-role" @click="outSelect">
+          <span>退出</span>
+        </div>
+        <div class="empty-role" @click="toVote">
+          <span>确定</span>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -163,13 +231,15 @@ const token = computed(() => store.getters['common/token'])
 const user = computed(() => store.getters['user/info'])
 const dicList = computed(() => store.getters['common/dicList'])
 
-ref: voteInfo = {}
-ref: rankList = []
-ref: roundStage = {}
-ref: showCount = true
-ref: voteRecord = []
-ref: activeTab = ''
-ref: activeRole = ''
+ref:voteInfo = {}
+ref:rankList = []
+ref:roundStage = {}
+ref:showCount = true
+ref:voteRecord = []
+ref:activeTab = ''
+ref:activeRole = ''
+ref:selectRole = false
+ref:selectList = []
 
 const getRecord = async () => {
   const result = await $query(readAll, {
@@ -189,8 +259,14 @@ const getRecord = async () => {
     voteRecord = result.data.data
   }
 }
+const outSelect = () => {
+  selectList = []
+  selectRole = false
+}
 const changeTab = () => {
-    // router.go(`#${activeTab}`)
+  // router.go(`#${activeTab}`)
+  voteRecord = []
+  outSelect()
   $query(readOne, {
     id: activeTab,
   }).then(async (res) => {
@@ -233,6 +309,29 @@ const getVote = (id) => {
   })
 }
 
+const showSelectVote = () => {
+  selectList = []
+  selectRole = true
+}
+
+const selectRoundRole = (roundId, roundRoleId) => {
+  const index = selectList.findIndex((v) => v.roundId === roundId)
+  const data = {
+    voteId: route.params.id,
+    roundStageId: roundStage.id,
+    userId: user.value.id,
+    roundId,
+    voteType: '0',
+    isExtra: '0',
+    roundRoleId,
+  }
+  if (index === -1) {
+    selectList.push(data)
+  } else {
+    selectList.splice(index, 1, data)
+  }
+}
+
 const onClickLeft = () => {
   router.back()
 }
@@ -260,23 +359,17 @@ const toVote = (row) => {
     Toast.fail('请先登录')
     return
   }
+  if (!selectList.length) {
+    Toast.fail('必须至少选择1个投票角色')
+    return
+  }
   Dialog.confirm({
     title: '提示',
     allowHtml: true,
-    message: `确认为 <b>${row.voteRole.roleName}</b> 投票吗，投票后将不能投票其他角色，是否继续？`,
+    message: `确认投票吗，投票后今日将不能继续该类投票，是否继续？`,
   }).then(() => {
     $mutate(batchCreateVoteRecord, {
-      input: [
-        {
-          voteId: route.params.id,
-          roundStageId: voteInfo.roundStage[0].id,
-          userId: user.value.id,
-          roundId: voteInfo.roundStage[0].round[0].id,
-          voteType: '0',
-          isExtra: '0',
-          roundRoleId: row.id,
-        },
-      ],
+      input: selectList,
     }).then(async (res) => {
       if (!res.errors) {
         if (res.data.data.code === '0') {
@@ -284,6 +377,7 @@ const toVote = (row) => {
             (a, b) => b.totalCount - a.totalCount
           )
           showCount = true
+          outSelect()
           await getRecord()
           Toast.success('投票成功！')
         } else {
@@ -305,10 +399,12 @@ watch(
       rankList = []
       showCount = true
       voteRecord = []
+      selectList = []
+      selectRole = false
       getVote(id)
     }
     if (hash) {
-    //   activeTab = hash
+      //   activeTab = hash
     }
   },
   {
@@ -355,14 +451,36 @@ watch(
       }
     }
   }
+  .select-view {
+    position: fixed;
+    left: 20px;
+    bottom: 70px;
+    display: flex;
+    align-items: center;
+    border: 1px solid #333;
+    background-color: #fff;
+    .role-view {
+      display: flex;
+      align-items: center;
+      .role-name {
+        text-align: center;
+        margin: 5px 0;
+        color: #333;
+      }
+    }
+    .empty-role {
+      width: 40px;
+      height: 40px;
+      border-left: 1px solid #333;
+      line-height: 40px;
+    }
+  }
 }
-.no-margin::v-deep {
-  .van-tabs__nav--card {
-    margin: 0 !important;
-  }
-  .van-tabs__nav--complete {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-  }
+.no-margin:deep(.van-tabs__nav--card) {
+  margin: 0 !important;
+}
+.no-margin:deep(.van-tabs__nav--complete) {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
 }
 </style>

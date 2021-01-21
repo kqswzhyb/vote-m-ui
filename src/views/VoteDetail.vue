@@ -132,10 +132,10 @@ const token = computed(() => store.getters['common/token'])
 const user = computed(() => store.getters['user/info'])
 const dicList = computed(() => store.getters['common/dicList'])
 
-ref: voteInfo = {}
-ref: rankList = []
-ref: showCount = true
-ref: voteRecord = []
+ref:voteInfo = {}
+ref:rankList = []
+ref:showCount = true
+ref:voteRecord = []
 
 const getRecord = async () => {
   const result = await $query(readAll, {
@@ -226,7 +226,7 @@ const toVote = (row) => {
           roundRoleId: row.id,
         },
       ],
-    }).then(async (res) => {
+    }).then(async (res) => {ref:
       if (!res.errors) {
         if (res.data.data.code === '0') {
           rankList = voteInfo.roundStage[0].round[0].roundRole.sort(

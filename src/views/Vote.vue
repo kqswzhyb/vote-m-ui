@@ -64,13 +64,13 @@ const {
 } = getCurrentInstance()
 const router = useRouter()
 
-ref: loading = false
-ref: finished = false
-ref: activeTab = '5'
-ref: listData = []
-ref: current = 1
-ref: limit = 3
-ref: total = ''
+ref:loading = false
+ref:finished = false
+ref:activeTab = '5'
+ref:listData = []
+ref:current = 1
+ref:limit = 3
+ref:total = ''
 
 const getList = () => {
   loading = true
@@ -151,12 +151,10 @@ onBeforeMount(() => {
     }
   }
 }
-.list-view::v-deep {
-  .van-list__finished-text {
-    width: 100%;
-  }
-  .van-list__loading {
-    width: 100%;
-  }
+.list-view:deep(.van-list__finished-text) {
+  width: 100%;
+}
+.list-view:deep(.van-list__loading) {
+  width: 100%;
 }
 </style>
