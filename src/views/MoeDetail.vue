@@ -46,16 +46,25 @@
           <van-button
             color="linear-gradient(to right, #ff6034, #ee0a24)"
             size="mini"
+            class="mr5"
             @click="showDialog('rule')"
-            >查看规则</van-button
+            >规则</van-button
           >
           <van-button
             v-if="voteInfo.hasReward"
             color="linear-gradient(to right, #ff6034, #ee0a24)"
             plain
             size="mini"
+            class="mr5"
             @click="showDialog('reward')"
-            >查看奖励</van-button
+            >奖励</van-button
+          >
+          <van-button
+            color="#7232dd"
+            size="mini"
+            :plain="token && isFollow"
+            @click="followVote"
+            >{{ token && isFollow ? '已关注' : '关注' }}</van-button
           >
         </div>
       </div>
@@ -213,6 +222,11 @@ import { useStore } from 'vuex'
 import { useRoute, useRouter } from 'vue-router'
 import { readOnePart } from '@/graphql/vote/vote'
 import { readOne } from '@/graphql/vote/round'
+import {
+  createUserFollow,
+  deleteUserFollow,
+  readAll as readFollow,
+} from '@/graphql/user/userFollow'
 import { readAll, batchCreateVoteRecord } from '@/graphql/vote/voteRecord'
 import { optionalChaining, shuffle, transferDic } from '@/utils/utils'
 import { Dialog, Toast } from 'vant'
@@ -231,15 +245,17 @@ const token = computed(() => store.getters['common/token'])
 const user = computed(() => store.getters['user/info'])
 const dicList = computed(() => store.getters['common/dicList'])
 
-ref:voteInfo = {}
-ref:rankList = []
-ref:roundStage = {}
-ref:showCount = true
-ref:voteRecord = []
-ref:activeTab = ''
-ref:activeRole = ''
-ref:selectRole = false
-ref:selectList = []
+ref: voteInfo = {}
+ref: rankList = []
+ref: roundStage = {}
+ref: showCount = true
+ref: voteRecord = []
+ref: activeTab = ''
+ref: activeRole = ''
+ref: selectRole = false
+ref: selectList = []
+ref: isFollow = false
+ref: followId = ''
 
 const getRecord = async () => {
   const result = await $query(readAll, {
@@ -259,6 +275,65 @@ const getRecord = async () => {
     voteRecord = result.data.data
   }
 }
+
+const getFollow = async () => {
+  const result = await $query(readFollow, {
+    filter: {
+      userId: JSON.stringify({
+        cond: 'eq',
+        value: user.value.id,
+      }),
+      followId: JSON.stringify({
+        cond: 'eq',
+        value: route.params.id,
+      }),
+    },
+    page: { limit: 10, offset: 0 },
+  })
+  if (!result.errors) {
+    isFollow = result.data.data.length
+    if (result.data.data.length) {
+      followId = result.data.data[0].id
+    }
+  }
+}
+const followVote = () => {
+  if (!token.value) {
+    Toast.fail('请先登录')
+    return
+  }
+  if (!isFollow) {
+    $mutate(createUserFollow, {
+      input: {
+        userId: user.value.id,
+        followId: route.params.id,
+        followType: '0',
+      },
+    }).then((res) => {
+      if (!res.errors) {
+        getFollow()
+        Toast.success('关注成功！')
+      } else {
+        Toast.fail('关注失败，请重试！')
+      }
+    })
+  } else {
+    $mutate(deleteUserFollow, {
+      id: followId,
+    }).then((res) => {
+      if (!res.errors) {
+        if (res.data.data.code === '0') {
+          isFollow = false
+          Toast.success('取关成功！')
+        } else {
+          Toast.fail(res.data.data.message)
+        }
+      } else {
+        Toast.fail('取关失败，请重试！')
+      }
+    })
+  }
+}
 const outSelect = () => {
   selectList = []
   selectRole = false
@@ -273,6 +348,7 @@ const changeTab = () => {
     roundStage = res.data.data
     if (token.value) {
       await getRecord()
+      getFollow()
     }
     if (
       voteInfo.status !== '5' ||

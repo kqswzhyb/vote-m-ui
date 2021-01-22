@@ -2,7 +2,10 @@ import VueApollo from 'vue-apollo'
 import { ApolloClient } from 'apollo-client'
 import { createHttpLink } from 'apollo-link-http'
 import { ApolloLink, from, concat } from 'apollo-link'
-import { InMemoryCache } from 'apollo-cache-inmemory'
+import {
+  InMemoryCache,
+  IntrospectionFragmentMatcher,
+} from 'apollo-cache-inmemory'
 import { onError } from 'apollo-link-error'
 import { Toast } from 'vant'
 import fetch from 'node-fetch'
@@ -29,7 +32,9 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors) {
     graphQLErrors.map(({ extensions }) => {
       console.log(
-        `[GraphQL error]: ${(extensions as any).exception.stacktrace.map(v=>v+'\n').toString()}`
+        `[GraphQL error]: ${(extensions as any).exception.stacktrace
+          .map((v) => v + '\n')
+          .toString()}`
       )
       Toast.fail('输入内容错误，请重试！')
     })
@@ -42,7 +47,20 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
 })
 
 // 缓存实现
-const cache = new InMemoryCache()
+const fragmentMatcher = new IntrospectionFragmentMatcher({
+  introspectionQueryResultData: {
+    __schema: {
+      types: [
+        {
+          kind: 'UNION',
+          name: 'Document',
+          possibleTypes: [{ name: 'Vote' }, { name: 'User' }],
+        },
+      ],
+    },
+  },
+})
+const cache = new InMemoryCache({ fragmentMatcher })
 
 // 创建 apollo 客户端
 const apolloClient = new ApolloClient({
