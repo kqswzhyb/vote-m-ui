@@ -4,7 +4,7 @@
       :title="voteInfo.voteName"
       left-text="返回"
       left-arrow
-      @click-left="onClickLeft"
+      @click-left="router.go(-1)"
     />
     <div class="vote-info">
       <img
@@ -61,6 +61,7 @@
             color="#7232dd"
             size="mini"
             :plain="token && isFollow"
+            v-preventReClick
             @click="followVote"
             >{{ token && isFollow ? '已关注' : '关注' }}</van-button
           >
@@ -107,6 +108,7 @@
               type="primary"
               plain
               size="mini"
+              v-preventReClick
               @click="toVote(item)"
               >投票</van-button
             >
@@ -259,9 +261,6 @@ const followVote = () => {
   }
 }
 
-const onClickLeft = () => {
-  router.back()
-}
 const showDialog = (mode) => {
   let title = ''
   let message = ''

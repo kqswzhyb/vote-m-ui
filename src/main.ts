@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import { apolloProvider, query, mutate } from './utils/apollo'
+import directive from './utils/directive'
 import App from './App.vue'
 import router from './router'
 import store from './store'
@@ -22,6 +23,8 @@ import {
   NavBar,
   Dialog,
   Icon,
+  Badge,
+  Cell
 } from 'vant'
 
 const app = createApp(App)
@@ -30,6 +33,9 @@ app.use(apolloProvider)
 app.config.globalProperties.$query = query
 app.config.globalProperties.$mutate = mutate
 app.config.globalProperties.$imgBaseUrl = imgBaseUrl
+Object.keys(directive).forEach(v=>{
+  app.directive(v, directive[v])
+})
 app.use(store)
 app.use(router)
 app.use(Button)
@@ -52,4 +58,6 @@ app.use(GridItem)
 app.use(NavBar)
 app.use(Dialog)
 app.use(Icon)
+app.use(Badge)
+app.use(Cell)
 app.mount('#app')

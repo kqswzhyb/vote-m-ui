@@ -67,10 +67,17 @@ $length: 100;
 .text-right {
   text-align: right;
 }
+.flex {
+  @include flex;
+}
 .flex-center {
-  display: flex;
+  @include flex;
   justify-content: center;
-  align-items: center;
+}
+
+.flex-between {
+  @include flex;
+  justify-content: space-between;
 }
 
 .grey1 {

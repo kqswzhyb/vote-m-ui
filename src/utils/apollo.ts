@@ -86,7 +86,7 @@ const apolloProvider = new VueApollo({
     },
   },
 })
-const query = (query, variables = null) => {
+const query = (query, variables) => {
   return apolloProvider.defaultClient.query({
     fetchPolicy: 'network-only',
     fetchResults: true,
@@ -95,7 +95,7 @@ const query = (query, variables = null) => {
   })
 }
 
-const mutate = (mutation, variables = null) => {
+const mutate = (mutation, variables) => {
   return apolloProvider.defaultClient.mutate({
     fetchPolicy: 'no-cache',
     mutation,

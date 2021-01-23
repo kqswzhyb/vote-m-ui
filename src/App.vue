@@ -32,4 +32,6 @@ onBeforeMount(() => {
 })
 </script>
 
-<style lang="scss"></style>
+<style lang="scss">
+@import './assets/icon/iconfont.css';
+</style>

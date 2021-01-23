@@ -56,6 +56,14 @@ export const readAll = gql`
   }
 `
 
+export const readCount = gql`
+  query readCount($filter: UserFollowFilter) {
+    data: userFollowCount(filter: $filter) {
+      total
+    }
+  }
+`
+
 export const createUserFollow = gql`
   mutation createUserFollow($input: CreateUserFollowInput!) {
     data: createUserFollow(input: $input) {

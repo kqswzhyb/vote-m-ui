@@ -40,11 +40,17 @@ onBeforeMount(() => {
     websocket.on('disconnect', () => {
       console.log('连接断开')
     })
-    websocket.on('card message', (msg) => {
-      // 接受数据
-    })
-    websocket.on('error message', (msg) => {
-      console.log('error:' + msg)
+    websocket.on('message', (msg) => {
+      if (msg === 'has new') {
+        store.commit('user/setMessage', {
+          list: [],
+          page: 0,
+          size: 5,
+          total: 0,
+        })
+        store.dispatch('user/getUserMessage')
+        store.dispatch('user/getUserUnreadMessage')
+      }
     })
   }
 })

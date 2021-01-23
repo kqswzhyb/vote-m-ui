@@ -38,6 +38,18 @@ const routes: Array<RouteRecordRaw> = [
         component: () =>
           import(/* webpackChunkName: "mine" */ "@/views/Mine.vue")
       },
+      {
+        path: "/message",
+        name: "Message",
+        component: () =>
+          import(/* webpackChunkName: "message" */ "@/views/MessageCenter.vue")
+      },
+      {
+        path: "/follow",
+        name: "Follow",
+        component: () =>
+          import(/* webpackChunkName: "follow" */ "@/views/MyFollow.vue")
+      },
     ]
   },
   {
@@ -58,6 +70,8 @@ router.beforeEach(async (to, form) => {
   if (token) {
     if (Object.keys((store as any).state.user.info).length === 1) {
       await store.dispatch('user/getUserInfo');
+      store.dispatch('user/getUserMessage')
+      store.dispatch('user/getUserUnreadMessage')
     }
     if (to.path === '/login') {
       router.push('/')

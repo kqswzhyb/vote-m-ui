@@ -1,0 +1,37 @@
+@font-face {font-family: "iconfont";
+  src: url('iconfont.eot?t=1611379698343'); /* IE9 */
+  src: url('iconfont.eot?t=1611379698343#iefix') format('embedded-opentype'), /* IE6-IE8 */
+  url('data:application/x-font-woff2;charset=utf-8;base64,d09GMgABAAAAAAPYAAsAAAAACSgAAAOKAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHEIGVgCDSAqFIIQkATYCJAMYCw4ABCAFhG0HVBvWBxGFRJN9JMbOo5fGVihSaqQVZ0E85X3VS3cy+RqQyxNEnQhk5etsTcfYFmEiTKfs1bH89N82aXd6aVjncRqlcFgQjh/ul3ppDZbPvp1LZFKmZlPyAR1Q1iJ5ZDehgU3Ip7pBdxETIj+/DAHcxJOLVK5auzE2GrBNAOndo1sH7JIe3UMVbJXVclYj8zGxjRnGNWAe/375QjGxwcBUgL31u1bpTHmnijNejS8cT2uKQrCeFfAugQJyAQ0yutU+FCVDuSjcyWJNTcCLjYFe6x6NnHbOCGd8YSGUxMAteOGfPBAMFBoTxMLM9AJQ2w6b4FTBCAScRggMcNohUOCMQKDBGZ+DCYC14hofcB74j03IRa4gyvBE6chIZPUL8oj/5brfrGURB8/GN/XMylm2Krzl0p3hXuP+/bAVh7sqt9Fh5tLw8Ow9Zc+U3ZmufC1kQqi7yZLloYuHzVoStv90bGPPrKwdkc0Xbw/1qocPI1Yd7Wy4VaeZi0NDM3eVPlV6e6rhayUTwt3Nlq0MX9pv+bFzJ6Kl3f37TWiyY1eqd+uenGby8GGTc/diaexrKmsfnKPs/X5/lWzzdYcYb6fM5WvjS+4cU9Aou97kn9vmV4qZdqXO6eTyoUvKL1l5z29AcfHe9lUq1rVvZst68ZD4K3yXO2lhEarcmzrI5u2cD5Sb7k4pXz5al6vViAFtpPrVCkMi67++8bp+pJBcLXKqcxqVXV+rlPtp2QFzkeapW3XKUSs9j4PRgA2qufEAA6BacXxcQdtPCCDQ/MmWd+0Cwn+2RwPwzPv8NvWa8WEbAzzBnyEYWadTETBYOi6O1yKARUmGcIu1uGEf/A/uYH5rKcNGZ4JgE6bBwI84UNikojU+F0w8lAALm3LgJofdZQ8hCENEu4BsngYIgbzAwJ+ToAjkjdb4L5iE8weLQBmCm6ayfKCHdMkXK0GjmED0gDzmhpBJFyJ7j+mlMlIUcdoZpcu94NluNbrDBmWNA9019VUJSLiGrfE6rCqGVrjAWO1MtQ0ch9q+yI657i2ohIAYFCQBiHgA5MQwDUQnK4va/fcgKRcqDNJTNGE/gwgd+eyAh407Ar2TN6OKnmVxx5UUH0UhexMhMDXA1rQiFQwxQNu+qgCJUWyyGYGWAMdqRmPl9v7K+ipPAW7AZy0xRIkWUyzxQ3U0yShlTiaCdd4ks3KSRXlVzRv4UtfrAQAA') format('woff2'),
+  url('iconfont.woff?t=1611379698343') format('woff'),
+  url('iconfont.ttf?t=1611379698343') format('truetype'), /* chrome, firefox, opera, Safari, Android, iOS 4.2+ */
+  url('iconfont.svg?t=1611379698343#iconfont') format('svg'); /* iOS 4.1- */
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-bad:before {
+  content: "\e745";
+}
+
+.icon-good:before {
+  content: "\e753";
+}
+
+.icon-remind:before {
+  content: "\e75f";
+}
+
+.icon-bad-fill:before {
+  content: "\e779";
+}
+
+.icon-good-fill:before {
+  content: "\e780";
+}
+

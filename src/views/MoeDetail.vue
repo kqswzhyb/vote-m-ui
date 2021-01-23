@@ -5,7 +5,7 @@
         :title="voteInfo.voteName"
         left-text="返回"
         left-arrow
-        @click-left="onClickLeft"
+        @click-left="router.go(-1)"
       />
     </van-sticky>
     <div class="vote-info">
@@ -63,6 +63,7 @@
             color="#7232dd"
             size="mini"
             :plain="token && isFollow"
+            v-preventReClick
             @click="followVote"
             >{{ token && isFollow ? '已关注' : '关注' }}</van-button
           >
@@ -208,7 +209,7 @@
         <div class="empty-role" @click="outSelect">
           <span>退出</span>
         </div>
-        <div class="empty-role" @click="toVote">
+        <div class="empty-role" v-preventReClick @click="toVote">
           <span>确定</span>
         </div>
       </div>
@@ -408,9 +409,6 @@ const selectRoundRole = (roundId, roundRoleId) => {
   }
 }
 
-const onClickLeft = () => {
-  router.back()
-}
 const showDialog = (mode) => {
   let title = ''
   let message = ''
@@ -531,13 +529,11 @@ watch(
     position: fixed;
     left: 20px;
     bottom: 70px;
-    display: flex;
-    align-items: center;
+    @include flex;
     border: 1px solid #333;
     background-color: #fff;
     .role-view {
-      display: flex;
-      align-items: center;
+      @include flex;
       .role-name {
         text-align: center;
         margin: 5px 0;

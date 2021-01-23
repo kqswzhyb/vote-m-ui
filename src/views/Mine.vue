@@ -2,7 +2,7 @@
   <div class="bg">
     <div class="order-list">
       <div class="user-info">
-        <div style="display: flex; align-items: center">
+        <div class="flex-between">
           <div class="avatar-view" @click="goLogin">
             <img
               class="avatar"
@@ -17,12 +17,29 @@
           </div>
           <p @click="goLogin">{{ !token ? '请先登录' : info.nickname }}</p>
         </div>
+        <van-badge
+          v-if="message.unread > 0"
+          :content="message.unread"
+          :max="99"
+          @click="router.push('/message')"
+        >
+          <span class="iconfont icon-remind fs24" style="color: #fff"></span>
+        </van-badge>
+        <span
+          v-else
+          class="iconfont icon-remind fs24"
+          style="color: #fff"
+        ></span>
       </div>
     </div>
     <van-grid direction="horizontal" :column-num="3">
-      <van-grid-item icon="records" text="投票记录" />
-      <van-grid-item icon="star-o" text="我的关注" />
-      <van-grid-item icon="discount" text="数据分析" />
+      <van-grid-item
+        v-for="item in personGridList"
+        :key="item.content"
+        :icon="item.icon"
+        :text="item.content"
+        @click="router.push(item.path)"
+      />
     </van-grid>
   </div>
 </template>
@@ -31,12 +48,14 @@
 import { computed } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
+import { personGridList } from '@/setting'
 
 const store = useStore()
 const router = useRouter()
 
 const token = computed(() => store.getters['common/token'])
 const info = computed(() => store.getters['user/info'])
+const message = computed(() => store.getters['user/message'])
 
 const goLogin = () => {
   if (!token.value) {
@@ -50,8 +69,7 @@ const goLogin = () => {
   width: 100vw;
   padding: 15px;
   box-sizing: border-box;
-  display: flex;
-  align-items: center;
+  @include flex;
   justify-content: space-between;
   background-color: #f50;
 
