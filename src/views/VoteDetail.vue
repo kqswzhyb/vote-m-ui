@@ -9,9 +9,15 @@
     <div class="vote-info">
       <img
         v-lazy="
-          $imgBaseUrl +
-            optionalChaining(voteInfo, 'voteConfig', 'file', 'fileFullPath') ||
-          '@/assets/images/none.png'
+          optionalChaining(voteInfo, 'voteConfig', 'file')
+            ? $imgBaseUrl +
+                optionalChaining(
+                  voteInfo,
+                  'voteConfig',
+                  'file',
+                  'fileFullPath'
+                ) || '@/assets/images/none.png'
+            : ''
         "
         style="width: calc(50vw - 10px); height: calc(50vw - 10px)"
         alt=""
@@ -88,8 +94,8 @@
     <div class="vote-cond">
       <div class="vote-table-header">
         <p class="text-center" style="width: 20vw">名次</p>
-        <p style="width: 60vw">角色</p>
-        <p style="width: 20vw">票数</p>
+        <p style="width: 55vw">角色</p>
+        <p style="width: 25vw">票数</p>
       </div>
       <template v-if="voteInfo.roundStage">
         <div
@@ -100,11 +106,19 @@
           <p class="text-center" style="width: 20vw">
             {{ showCount ? index + 1 : '???' }}
           </p>
-          <p style="width: 60vw">{{ item.voteRole.roleName }}</p>
-          <p style="width: 20vw">
+          <p style="width: 55vw">{{ item.voteRole.roleName }}</p>
+          <p style="width: 25vw">
             <span v-if="showCount">{{ item.totalCount }}</span>
+            <span
+              v-if="
+                showCount &&
+                new Date().getTime() >
+                  new Date(voteInfo.roundStage[0].round[0].endTime).getTime()
+              "
+              >{{ item.isPromotion === '0' ? '（淘汰）' : '（晋级）' }}</span
+            >
             <van-button
-              v-else
+              v-if="!showCount"
               type="primary"
               plain
               size="mini"

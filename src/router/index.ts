@@ -15,22 +15,10 @@ const routes: Array<RouteRecordRaw> = [
           import(/* webpackChunkName: "vote" */ "@/views/Vote.vue")
       },
       {
-        path: "/vote/:id",
-        name: "VoteDetail",
-        component: () =>
-          import(/* webpackChunkName: "voteDetail" */ "@/views/VoteDetail.vue")
-      },
-      {
         path: "/moe",
         name: "Moe",
         component: () =>
           import(/* webpackChunkName: "moe" */ "@/views/Moe.vue")
-      },
-      {
-        path: "/moe/:id",
-        name: "MoeDetail",
-        component: () =>
-          import(/* webpackChunkName: "moeDetail" */ "@/views/MoeDetail.vue")
       },
       {
         path: "/mine",
@@ -38,19 +26,37 @@ const routes: Array<RouteRecordRaw> = [
         component: () =>
           import(/* webpackChunkName: "mine" */ "@/views/Mine.vue")
       },
-      {
-        path: "/message",
-        name: "Message",
-        component: () =>
-          import(/* webpackChunkName: "message" */ "@/views/MessageCenter.vue")
-      },
-      {
-        path: "/follow",
-        name: "Follow",
-        component: () =>
-          import(/* webpackChunkName: "follow" */ "@/views/MyFollow.vue")
-      },
     ]
+  },
+  {
+    path: "/vote/:id",
+    name: "VoteDetail",
+    component: () =>
+      import(/* webpackChunkName: "voteDetail" */ "@/views/VoteDetail.vue")
+  },
+  {
+    path: "/moe/:id",
+    name: "MoeDetail",
+    component: () =>
+      import(/* webpackChunkName: "moeDetail" */ "@/views/MoeDetail.vue")
+  },
+  {
+    path: "/message",
+    name: "Message",
+    component: () =>
+      import(/* webpackChunkName: "message" */ "@/views/MessageCenter.vue")
+  },
+  {
+    path: "/follow",
+    name: "Follow",
+    component: () =>
+      import(/* webpackChunkName: "follow" */ "@/views/MyFollow.vue")
+  },
+  {
+    path: "/record",
+    name: "Record",
+    component: () =>
+      import(/* webpackChunkName: "record" */ "@/views/VoteRecord.vue")
   },
   {
     path: "/login",

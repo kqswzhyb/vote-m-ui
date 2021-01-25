@@ -6,15 +6,33 @@ export const readAll = gql`
       id
       roundRoleId
       voteId
+      vote{
+        voteName
+      }
       roundStageId
       roundId
+      round {
+        roundName
+      }
       roundRole {
         voteRole {
           roleName
+          file {
+            fileFullPath
+          }
         }
       }
+      createdAt
       voteType
       isExtra
+    }
+  }
+`
+
+export const readCount = gql`
+  query readCount($filter: VoteRecordFilter) {
+    data: voteRecordCount(filter: $filter) {
+      total
     }
   }
 `

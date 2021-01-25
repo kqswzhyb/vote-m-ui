@@ -11,9 +11,15 @@
     <div class="vote-info">
       <img
         v-lazy="
-          $imgBaseUrl +
-            optionalChaining(voteInfo, 'voteConfig', 'file', 'fileFullPath') ||
-          '@/assets/images/none.png'
+          optionalChaining(voteInfo, 'voteConfig', 'file')
+            ? $imgBaseUrl +
+                optionalChaining(
+                  voteInfo,
+                  'voteConfig',
+                  'file',
+                  'fileFullPath'
+                ) || '@/assets/images/none.png'
+            : ''
         "
         style="width: calc(50vw - 10px); height: calc(50vw - 10px)"
         alt=""
@@ -70,150 +76,180 @@
         </div>
       </div>
     </div>
-    <van-sticky :offset-top="46">
-      <van-tabs
-        class="no-margin"
-        v-model:active="activeTab"
-        @change="changeTab"
-        v-if="voteInfo.roundStage"
-        type="card"
-      >
-        <van-tab
-          v-for="item in voteInfo.roundStage"
-          :key="item.id"
-          :name="item.id"
-          :title="item.name"
+    <van-tabs v-model:active="area" class="mb15">
+      <van-tab title="投票" name="vote"></van-tab>
+      <van-tab title="评论" name="discuss"></van-tab>
+    </van-tabs>
+    <div v-if="area === 'vote'">
+      <van-sticky :offset-top="46">
+        <van-tabs
+          class="no-margin"
+          v-model:active="activeTab"
+          @change="changeTab"
+          v-if="voteInfo.roundStage"
+          type="card"
         >
-        </van-tab>
-      </van-tabs>
-    </van-sticky>
-    <van-sticky
-      :offset-top="74"
-      v-if="voteInfo.voteRoleType && voteInfo.voteRoleType.length > 1"
-    >
-      <van-tabs v-model:active="activeRole" sticky>
-        <van-tab
-          v-for="item in voteInfo.voteRoleType"
-          :key="item.id"
-          :name="item.id"
-          :title="item.name"
+          <van-tab
+            v-for="item in voteInfo.roundStage"
+            :key="item.id"
+            :name="item.id"
+            :title="item.name"
+          >
+          </van-tab>
+        </van-tabs>
+      </van-sticky>
+      <van-sticky
+        :offset-top="74"
+        v-if="voteInfo.voteRoleType && voteInfo.voteRoleType.length > 1"
+      >
+        <van-tabs v-model:active="activeRole" sticky>
+          <van-tab
+            v-for="item in voteInfo.voteRoleType"
+            :key="item.id"
+            :name="item.id"
+            :title="item.name"
+          >
+          </van-tab>
+        </van-tabs>
+      </van-sticky>
+      <p class="fs12 ml10" v-if="voteInfo.roundStage && rankList.length">
+        每{{
+          transferDic(
+            dicList['vote_update_type'],
+            optionalChaining(voteInfo, 'voteConfig', 'voteUpdateType')
+          )
+        }}更新一次，上次更新于{{
+          optionalChaining(rankList, 0, 'roundRole', 0, 'updatedAt')
+        }}
+      </p>
+      <p class="fs12 ml10" v-if="rankList.length">
+        投票时间：<span
+          >{{ roundStage.startTime }} ~ {{ roundStage.endTime }}</span
         >
-        </van-tab>
-      </van-tabs>
-    </van-sticky>
-    <p class="fs12 ml10" v-if="voteInfo.roundStage && rankList.length">
-      每{{
-        transferDic(
-          dicList['vote_update_type'],
-          optionalChaining(voteInfo, 'voteConfig', 'voteUpdateType')
-        )
-      }}更新一次，上次更新于{{
-        optionalChaining(rankList, 0, 'roundRole', 0, 'updatedAt')
-      }}
-    </p>
-    <p class="fs12 ml10" v-if="rankList.length">
-      投票时间：<span
-        >{{ roundStage.startTime }} ~ {{ roundStage.endTime }}</span
+      </p>
+      <p
+        class="fs12 ml10"
+        v-if="
+          token &&
+          voteRecord.length &&
+          new Date().getTime() >= new Date(roundStage.startTime).getTime()
+        "
       >
-    </p>
-    <p
-      class="fs12 ml10"
-      v-if="
-        token &&
-        voteRecord.length &&
-        new Date().getTime() >= new Date(roundStage.startTime).getTime()
-      "
-    >
-      您的选择：<span v-for="(item, index) in voteRecord" :key="item.id"
-        >{{ item.roundRole.voteRole.roleName
-        }}{{ index === voteRecord.length - 1 ? '' : '，' }}</span
+        您的选择：<span v-for="(item, index) in voteRecord" :key="item.id"
+          >{{ item.roundRole.voteRole.roleName
+          }}{{ index === voteRecord.length - 1 ? '' : '，' }}</span
+        >
+      </p>
+      <p
+        class="fs12 ml10"
+        v-if="
+          token &&
+          !voteRecord.length &&
+          new Date().getTime() >= new Date(roundStage.startTime).getTime() &&
+          new Date().getTime() <= new Date(roundStage.endTime).getTime()
+        "
       >
-    </p>
-    <p
-      class="fs12 ml10"
-      v-if="
-        token &&
-        !voteRecord.length &&
-        new Date().getTime() >= new Date(roundStage.startTime).getTime() &&
-        new Date().getTime() <= new Date(roundStage.endTime).getTime()
-      "
-    >
-      <van-button
-        color="linear-gradient(to right, #ff6034, #ee0a24)"
-        size="mini"
-        @click="showSelectVote"
-        >投票</van-button
-      >
-    </p>
-    <div class="vote-cond">
-      <template v-if="rankList.length && rankList[0].roundRole.length">
-        <div v-for="item in rankList" :key="item.id" class="mt10">
-          <h3 class="text-center">{{ item.groupName }}</h3>
-          <div class="role-view">
-            <div
-              v-for="sin in item.roundRole"
-              :key="sin.id"
-              @click="selectRoundRole(item.id, sin.id)"
-            >
-              <img
-                v-lazy="
-                  $imgBaseUrl +
-                    optionalChaining(sin.voteRole, 'file', 'fileFullPath') ||
-                  '@/assets/images/none.png'
-                "
-                style="width: calc(40vw - 10px); height: calc(40vw - 10px)"
-                alt=""
-              />
-              <p class="role-name">
-                {{ optionalChaining(sin.voteRole, 'roleName') }}
-              </p>
-              <p class="role-vote">
-                <van-icon name="fire" color="#fa3b19" class="mr5" /><span
-                  class="fs15"
-                  >{{ sin.totalCount }}</span
-                >
-              </p>
+        <van-button
+          color="linear-gradient(to right, #ff6034, #ee0a24)"
+          size="mini"
+          @click="showSelectVote"
+          >投票</van-button
+        >
+      </p>
+      <div class="vote-cond">
+        <template v-if="rankList.length && rankList[0].roundRole.length">
+          <div v-for="item in rankList" :key="item.id" class="mt10">
+            <h3 class="text-center">{{ item.groupName }}</h3>
+            <div class="role-view">
+              <div
+                v-for="sin in item.roundRole"
+                :key="sin.id"
+                @click="selectRoundRole(item.id, sin.id)"
+              >
+                <img
+                  v-lazy="
+                    optionalChaining(sin.voteRole, 'file')
+                      ? $imgBaseUrl +
+                          optionalChaining(
+                            sin.voteRole,
+                            'file',
+                            'fileFullPath'
+                          ) || '@/assets/images/none.png'
+                      : ''
+                  "
+                  style="width: calc(40vw - 10px); height: calc(40vw - 10px)"
+                  alt=""
+                />
+                <p class="role-name">
+                  {{ optionalChaining(sin.voteRole, 'roleName') }}
+                </p>
+                <p class="role-vote">
+                  <van-icon name="fire" color="#fa3b19" class="mr5" /><span
+                    class="fs15"
+                    >{{ showCount ? sin.totalCount : '???' }}</span
+                  >
+                  <span
+                    v-if="
+                      showCount &&
+                      new Date().getTime() > new Date(item.endTime).getTime()
+                    "
+                    >{{
+                      sin.isPromotion === '0' ? '（淘汰）' : '（晋级）'
+                    }}</span
+                  >
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      </template>
-      <van-empty v-else image="search" description="暂无投票信息" />
-    </div>
-    <div class="select-view" v-if="selectRole">
-      <span class="text-center">已选</span>
-      <div class="role-view">
-        <div
-          v-for="(item, index) in rankList"
-          class="empty-role"
-          :key="item.id"
-        >
-          <img
-            v-if="selectList[index]"
-            v-lazy="
-              $imgBaseUrl +
+        </template>
+        <van-empty v-else image="search" description="暂无投票信息" />
+      </div>
+      <div class="select-view" v-if="selectRole">
+        <span class="text-center">已选</span>
+        <div class="role-view">
+          <div
+            v-for="(item, index) in rankList"
+            class="empty-role"
+            :key="item.id"
+          >
+            <img
+              v-if="selectList[index]"
+              v-lazy="
                 optionalChaining(
                   rankList
                     .find((v) => v.id === selectList[index].roundId)
                     .roundRole.find(
                       (v) => v.id === selectList[index].roundRoleId
                     ).voteRole,
-                  'file',
-                  'fileFullPath'
-                ) || '@/assets/images/none.png'
-            "
-            width="40"
-            height="40"
-            alt=""
-          />
-        </div>
-        <div class="empty-role" @click="outSelect">
-          <span>退出</span>
-        </div>
-        <div class="empty-role" v-preventReClick @click="toVote">
-          <span>确定</span>
+                  'file'
+                )
+                  ? $imgBaseUrl +
+                      optionalChaining(
+                        rankList
+                          .find((v) => v.id === selectList[index].roundId)
+                          .roundRole.find(
+                            (v) => v.id === selectList[index].roundRoleId
+                          ).voteRole,
+                        'file',
+                        'fileFullPath'
+                      ) || '@/assets/images/none.png'
+                  : ''
+              "
+              width="40"
+              height="40"
+              alt=""
+            />
+          </div>
+          <div class="empty-role" @click="outSelect">
+            <span>退出</span>
+          </div>
+          <div class="empty-role" v-preventReClick @click="toVote">
+            <span>确定</span>
+          </div>
         </div>
       </div>
     </div>
+    <DiscussArea v-if="area === 'discuss'" />
   </div>
 </template>
 
@@ -231,6 +267,7 @@ import {
 import { readAll, batchCreateVoteRecord } from '@/graphql/vote/voteRecord'
 import { optionalChaining, shuffle, transferDic } from '@/utils/utils'
 import { Dialog, Toast } from 'vant'
+import DiscussArea from '@/components/DiscussArea'
 
 const route = useRoute()
 const router = useRouter()
@@ -257,6 +294,7 @@ ref: selectRole = false
 ref: selectList = []
 ref: isFollow = false
 ref: followId = ''
+ref: area = 'vote'
 
 const getRecord = async () => {
   const result = await $query(readAll, {
@@ -475,6 +513,7 @@ watch(
       voteRecord = []
       selectList = []
       selectRole = false
+      area = 'vote'
       getVote(id)
     }
     if (hash) {
@@ -504,7 +543,7 @@ watch(
   }
   .vote-cond {
     margin-top: 20px;
-    padding-bottom: 50px;
+    padding-bottom: 70px;
     width: 100%;
     background-color: #fff;
     .role-view {

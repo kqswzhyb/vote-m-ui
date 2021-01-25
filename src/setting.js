@@ -22,7 +22,7 @@ export const tabbarList = [
 export const personGridList = [
   {
     icon: 'records',
-    path: '/',
+    path: '/record',
     content: '投票记录',
   },
   {
