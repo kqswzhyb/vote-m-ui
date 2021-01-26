@@ -13,6 +13,7 @@ export const readAll = gql`
         }
       }
       replyId
+      signalType
       voteDiscuss {
         id
         voteId
@@ -24,6 +25,7 @@ export const readAll = gql`
           }
         }
         replyId
+        signalType
         content
         likeCount
         dislikeCount
@@ -51,14 +53,60 @@ export const createVoteDiscuss = gql`
   mutation createVoteDiscuss($input: CreateVoteDiscussInput!) {
     data: createVoteDiscuss(input: $input) {
       id
-      userId
       voteId
+      userId
+      user {
+        nickname
+        file {
+          fileFullPath
+        }
+      }
       replyId
+      signalType
+      voteDiscuss {
+        id
+        voteId
+        userId
+        user {
+          nickname
+          file {
+            fileFullPath
+          }
+        }
+        replyId
+        signalType
+        content
+        likeCount
+        dislikeCount
+        floor
+        createdAt
+      }
       content
       likeCount
       dislikeCount
       floor
       createdAt
+    }
+  }
+`
+
+export const createVoteDiscussSignal = gql`
+  mutation createVoteDiscussSignal($input: CreateVoteDiscussSignalInput!) {
+    data: createVoteDiscussSignal(input: $input) {
+      id
+      userId
+      voteDiscussId
+      signalType
+      createdAt
+    }
+  }
+`
+
+export const deleteVoteDiscussSignal = gql`
+  mutation deleteVoteDiscussSignal($id: ID!) {
+    deleteVoteDiscussSignal(id: $id) {
+      code
+      message
     }
   }
 `

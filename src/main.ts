@@ -24,7 +24,8 @@ import {
   Dialog,
   Icon,
   Badge,
-  Cell
+  Cell,
+  ActionSheet
 } from 'vant'
 
 const app = createApp(App)
@@ -60,4 +61,5 @@ app.use(Dialog)
 app.use(Icon)
 app.use(Badge)
 app.use(Cell)
+app.use(ActionSheet)
 app.mount('#app')
