@@ -254,7 +254,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, getCurrentInstance, computed } from 'vue'
+import { ref, watch, getCurrentInstance, computed} from 'vue'
 import { useStore } from 'vuex'
 import { useRoute, useRouter } from 'vue-router'
 import { readOnePart } from '@/graphql/vote/vote'
@@ -378,7 +378,6 @@ const outSelect = () => {
   selectRole = false
 }
 const changeTab = () => {
-  // router.go(`#${activeTab}`)
   voteRecord = []
   outSelect()
   $query(readOne, {
@@ -517,7 +516,6 @@ watch(
       getVote(id)
     }
     if (hash) {
-      //   activeTab = hash
     }
   },
   {
