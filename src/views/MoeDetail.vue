@@ -77,8 +77,13 @@
       </div>
     </div>
     <van-tabs v-model:active="area" class="mb15">
-      <van-tab title="投票" name="vote"></van-tab>
-      <van-tab title="评论" name="discuss"></van-tab>
+      <van-tab title="投票区" name="vote"></van-tab>
+      <van-tab title="评论区" name="discuss"></van-tab>
+      <van-tab
+        title="趋势图"
+        v-if="voteInfo.voteConfig.showChart === '0'"
+        name="chart"
+      ></van-tab>
     </van-tabs>
     <div v-if="area === 'vote'">
       <van-sticky :offset-top="46">
@@ -250,11 +255,21 @@
       </div>
     </div>
     <DiscussArea v-if="area === 'discuss'" />
+    <Chart
+      :show="
+        voteInfo.status !== '5' ||
+        voteInfo.voteConfig.voteShowType === '1' ||
+        new Date().getTime() >= new Date(roundStage.endTime).getTime() ||
+        !!voteRecord.length
+      "
+      :rounds="optionalChaining(voteInfo, 'roundStage') || []"
+      v-if="area === 'chart'"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, getCurrentInstance, computed} from 'vue'
+import { ref, watch, getCurrentInstance, computed } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute, useRouter } from 'vue-router'
 import { readOnePart } from '@/graphql/vote/vote'
@@ -267,7 +282,8 @@ import {
 import { readAll, batchCreateVoteRecord } from '@/graphql/vote/voteRecord'
 import { optionalChaining, shuffle, transferDic } from '@/utils/utils'
 import { Dialog, Toast } from 'vant'
-import DiscussArea from '@/components/DiscussArea'
+import DiscussArea from '@/components/DiscussArea.vue'
+import Chart from '@/components/Chart.vue'
 
 const route = useRoute()
 const router = useRouter()

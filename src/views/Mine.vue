@@ -41,6 +41,9 @@
         @click="router.push(item.path)"
       />
     </van-grid>
+    <van-button v-if='token' type="primary" size="large" plain @click="goLogout"
+      >退出登录</van-button
+    >
   </div>
 </template>
 
@@ -49,6 +52,7 @@ import { computed } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { personGridList } from '@/setting'
+import { logout } from '@/graphql/api.ts'
 
 const store = useStore()
 const router = useRouter()
@@ -61,6 +65,14 @@ const goLogin = () => {
   if (!token.value) {
     router.push('/login')
   }
+}
+const goLogout = () => {
+  logout().then((res) => {
+    if (res.data.code === '0') {
+      localStorage.removeItem('token')
+      window.location.reload()
+    }
+  })
 }
 </script>
 
