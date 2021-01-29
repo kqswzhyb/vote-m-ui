@@ -74,63 +74,106 @@
         </div>
       </div>
     </div>
-    <div class="ml10" v-if="voteRecord.length">
-      <p>
-        您的选择：<span v-for="item in voteRecord" :key="item.id">{{
-          item.roundRole.voteRole.roleName
-        }}</span>
-      </p>
-    </div>
-    <p class="fs12 ml10" v-if="voteInfo.roundStage">
-      每{{
-        transferDic(
-          dicList['vote_update_type'],
-          voteInfo.voteConfig.voteUpdateType
-        )
-      }}更新一次，上次更新于{{
-        voteInfo.roundStage[0].round[0].roundRole[0].updatedAt
-      }}
-    </p>
-    <div class="vote-cond">
-      <div class="vote-table-header">
-        <p class="text-center" style="width: 20vw">名次</p>
-        <p style="width: 55vw">角色</p>
-        <p style="width: 25vw">票数</p>
+    <van-tabs v-model:active="area" class="mb15">
+      <van-tab title="投票区" name="vote"></van-tab>
+      <van-tab title="评论区" name="discuss"></van-tab>
+      <van-tab
+        title="趋势图"
+        v-if="optionalChaining(voteInfo, 'voteConfig', 'showChart') === '0'"
+        name="chart"
+      ></van-tab>
+    </van-tabs>
+    <div v-if="area === 'vote'">
+      <div class="ml10" v-if="voteRecord.length">
+        <p>
+          您的选择：<span v-for="item in voteRecord" :key="item.id">{{
+            item.roundRole.voteRole.roleName
+          }}</span>
+        </p>
       </div>
-      <template v-if="voteInfo.roundStage">
-        <div
-          v-for="(item, index) in rankList"
-          :key="item.id"
-          class="vote-table-body"
-        >
-          <p class="text-center" style="width: 20vw">
-            {{ showCount ? index + 1 : '???' }}
-          </p>
-          <p style="width: 55vw">{{ item.voteRole.roleName }}</p>
-          <p style="width: 25vw">
-            <span v-if="showCount">{{ item.totalCount }}</span>
-            <span
-              v-if="
-                showCount &&
-                new Date().getTime() >
-                  new Date(voteInfo.roundStage[0].round[0].endTime).getTime()
-              "
-              >{{ item.isPromotion === '0' ? '（淘汰）' : '（晋级）' }}</span
-            >
-            <van-button
-              v-if="!showCount"
-              type="primary"
-              plain
-              size="mini"
-              v-preventReClick
-              @click="toVote(item)"
-              >投票</van-button
-            >
-          </p>
+      <p class="fs12 ml10" v-if="voteInfo.roundStage">
+        每{{
+          transferDic(
+            dicList['vote_update_type'],
+            voteInfo.voteConfig.voteUpdateType
+          )
+        }}更新一次，上次更新于{{
+          optionalChaining(
+            voteInfo,
+            'roundStage',
+            0,
+            'round',
+            0,
+            'roundRole',
+            0,
+            'updatedAt'
+          )
+        }}
+      </p>
+      <div class="vote-cond">
+        <div class="vote-table-header">
+          <p class="text-center" style="width: 20vw">名次</p>
+          <p style="width: 55vw">角色</p>
+          <p style="width: 25vw">票数</p>
         </div>
-      </template>
-      <van-empty v-else image="search" description="暂无投票信息" />
+        <template v-if="voteInfo.roundStage">
+          <div
+            v-for="(item, index) in rankList"
+            :key="item.id"
+            class="vote-table-body"
+          >
+            <p class="text-center" style="width: 20vw">
+              {{ showCount ? index + 1 : '???' }}
+            </p>
+            <p style="width: 55vw">{{ item.voteRole.roleName }}</p>
+            <p style="width: 25vw">
+              <span v-if="showCount">{{ item.totalCount }}</span>
+              <span
+                v-if="
+                  showCount &&
+                  new Date().getTime() >
+                    new Date(
+                      optionalChaining(
+                        voteInfo,
+                        'roundStage',
+                        0,
+                        'round',
+                        0,
+                        'endTime'
+                      )
+                    ).getTime()
+                "
+                >{{ item.isPromotion === '0' ? '（淘汰）' : '（获胜）' }}</span
+              >
+              <van-button
+                v-if="!showCount"
+                type="primary"
+                plain
+                size="mini"
+                v-preventReClick
+                @click="toVote(item)"
+                >投票</van-button
+              >
+            </p>
+          </div>
+        </template>
+        <van-empty v-else image="search" description="暂无投票信息" />
+      </div>
     </div>
+    <DiscussArea v-if="area === 'discuss'" />
+    <Chart
+      :show="
+        voteInfo.status !== '5' ||
+        optionalChaining(voteInfo, 'voteConfig', 'voteShowType') === '1' ||
+        new Date().getTime() >=
+          new Date(
+            optionalChaining(voteInfo, 'roundStage', 0, 'round', 0, 'endTime')
+          ).getTime() ||
+        !!voteRecord.length
+      "
+      :rounds="optionalChaining(voteInfo, 'roundStage') || []"
+      v-if="area === 'chart'"
+    />
   </div>
 </template>
 
@@ -147,6 +190,8 @@ import {
 import { readAll, batchCreateVoteRecord } from '@/graphql/vote/voteRecord'
 import { optionalChaining, shuffle, transferDic } from '@/utils/utils'
 import { Dialog, Toast } from 'vant'
+import DiscussArea from '@/components/DiscussArea.vue'
+import Chart from '@/components/Chart.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -168,6 +213,7 @@ ref: showCount = true
 ref: voteRecord = []
 ref: isFollow = false
 ref: followId = ''
+ref: area = 'vote'
 
 const getRecord = async () => {
   const result = await $query(readAll, {
@@ -344,6 +390,7 @@ watch(
       showCount = true
       voteRecord = []
       isFollow = false
+      area = 'vote'
       getVote(val.id)
     }
   },

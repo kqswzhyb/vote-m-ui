@@ -81,7 +81,7 @@
       <van-tab title="评论区" name="discuss"></van-tab>
       <van-tab
         title="趋势图"
-        v-if="voteInfo.voteConfig.showChart === '0'"
+        v-if="optionalChaining(voteInfo, 'voteConfig', 'showChart') === '0'"
         name="chart"
       ></van-tab>
     </van-tabs>
@@ -269,7 +269,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, getCurrentInstance, computed } from 'vue'
+import { ref, watch, getCurrentInstance, computed, onBeforeMount } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute, useRouter } from 'vue-router'
 import { readOnePart } from '@/graphql/vote/vote'
@@ -394,6 +394,9 @@ const outSelect = () => {
   selectRole = false
 }
 const changeTab = () => {
+  if (activeTab !== route.hash.slice(1)) {
+    router.replace({ name: 'MoeDetail', hash: `#${activeTab}` })
+  }
   voteRecord = []
   outSelect()
   $query(readOne, {
@@ -430,7 +433,9 @@ const getVote = (id) => {
     if (!res.errors) {
       voteInfo = res.data.data
       activeRole = voteInfo.voteRoleType[0].id
-      activeTab = voteInfo.roundStage[0].id
+      if (activeTab !== route.hash.slice(1)) {
+        activeTab = voteInfo.roundStage[0].id
+      }
       changeTab()
       voteInfo.roundStage.filter(
         (v) => v.roleTypeId === voteInfo.voteRoleType[0].id
@@ -518,26 +523,27 @@ const toVote = (row) => {
 }
 
 watch(
-  [() => route.params.id, () => route.hash],
-  ([id, hash]) => {
-    if (id) {
-      voteInfo = {}
-      roundStage = {}
-      rankList = []
-      showCount = true
-      voteRecord = []
-      selectList = []
-      selectRole = false
-      area = 'vote'
-      getVote(id)
-    }
+  [() => route.hash],
+  ([hash]) => {
     if (hash) {
+      activeTab = hash.slice(1)
     }
   },
   {
     immediate: true,
   }
 )
+onBeforeMount(() => {
+  voteInfo = {}
+  roundStage = {}
+  rankList = []
+  showCount = true
+  voteRecord = []
+  selectList = []
+  selectRole = false
+  area = 'vote'
+  getVote(route.params.id)
+})
 </script>
 
 <style lang="scss" scoped>

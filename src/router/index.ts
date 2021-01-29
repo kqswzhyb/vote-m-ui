@@ -69,15 +69,7 @@ const routes: Array<RouteRecordRaw> = [
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
-  routes,
-  scrollBehavior(to, from, savedPosition) {
-    if (to.hash) {
-      return {
-        el: to.hash.slice(1),
-        behavior: 'smooth',
-      }
-    }
-  }
+  routes
 })
 
 router.beforeEach(async (to, form) => {
